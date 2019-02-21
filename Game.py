@@ -3,7 +3,7 @@ import pygame
 pygame.init()
 
 window_width = 1280
-window_height = 720
+window_height = 736
 
 window_display = pygame.display.set_mode((window_width, window_height))
 pygame.display.set_caption("A way out")
@@ -11,15 +11,14 @@ clock = pygame.time.Clock()
 
 running_right = [pygame.image.load(f'santa_running_right/Run{frame}.png') for frame in range(1, 11)]
 running_left = [pygame.image.load(f'santa_running_left/Run{frame}.png') for frame in range(1, 11)]
-background = pygame.image.load('background/bulkhead-walls.png')
 
 
 class Santa(object):
-    def __init__(self, santa_x, santa_y, x, y):
+    def __init__(self, x, y):
         self.deadSanta_x = window_width/2 - 150
         self.deadSanta_y = 0.648 * window_height
-        self.santa_x = santa_x
-        self.santa_y = santa_y
+        self.santa_x = 200
+        self.santa_y = 137
         self.x = x
         self.y = y
         self.speed = 5
@@ -49,14 +48,14 @@ class Santa(object):
 
 def refresh_window_display():
 
-    window_display.blit(background, (0, 0))
+    window_display.fill((0, 0, 0))
     man.move_santa(window_display)
     pygame.display.update()
 
 
 playing = True
 
-man = Santa(120, 10, window_width/2 - 150, 0.648 * window_height)
+man = Santa(window_width/2 - 150, 0.648 * window_height)
 
 while playing:
 
@@ -68,13 +67,13 @@ while playing:
 
     keys = pygame.key.get_pressed()
 
-    if keys[pygame.K_LEFT] and man.x > man.speed:
+    if keys[pygame.K_LEFT] and man.x > man.speed - 70:
         man.x -= man.speed
         man.left = True
         man.right = False
         man.standing = False
 
-    elif keys[pygame.K_RIGHT] and man.x < window_width - man.speed - man.santa_x:
+    elif keys[pygame.K_RIGHT] and man.x < window_width - man.speed - man.santa_x + 70:
         man.x += man.speed
         man.right = True
         man.left = False
@@ -84,7 +83,7 @@ while playing:
         man.y += man.speed
         man.standing = False
 
-    elif keys[pygame.K_UP] and man.y > man.santa_y + man.speed:
+    elif keys[pygame.K_UP] and man.y > man.santa_y - man.speed - 125:
         man.y -= man.speed
         man.standing = False
     else:
