@@ -13,60 +13,50 @@ running_right = [pygame.image.load(f'santa_running_right/Run{frame}.png') for fr
 running_left = [pygame.image.load(f'santa_running_left/Run{frame}.png') for frame in range(1, 11)]
 background = pygame.image.load('background/bulkhead-walls.png')
 
-deadSanta_x = window_width/2 - 150
-deadSanta_y = 0.648 * window_height
 
-class santa(object):
+class Santa(object):
     def __init__(self, santa_x, santa_y, x, y):
+        self.deadSanta_x = window_width/2 - 150
+        self.deadSanta_y = 0.648 * window_height
         self.santa_x = santa_x
         self.santa_y = santa_y
         self.x = x
         self.y = y
-        self.speed = speed
-        self.left = left
-        self.right = right
+        self.speed = 5
+        self.left = False
+        self.right = False
         self.run_count = 0
         self.standing = True
 
+    def move_santa(self, window_display):
 
-santa_x = 120
-santa_y = 10
+        if self.run_count + 1 >= 30:
+            self.run_count = 0
 
-x = window_width/2 - 150
-y = 0.648 * window_height
-
-speed = 5
-left = False
-right = False
-run_count = 0
-standing = True
+        if not self.standing:
+            if self.left:
+                window_display.blit(running_left[self.run_count // 3], (self.x, self.y))
+                self.run_count += 1
+            elif self.right:
+                window_display.blit(running_right[self.run_count // 3], (self.x, self.y))
+                self.run_count += 1
+        else:
+            if self.left:
+                window_display.blit(running_left[0], (self.x, self.y))
+            else:
+                window_display.blit(running_right[0], (self.x, self.y))
 
 
 def refresh_window_display():
-    global run_count
 
     window_display.blit(background, (0, 0))
-
-    if run_count + 1 >= 30:
-        run_count = 0
-
-    if not standing:
-        if left:
-            window_display.blit(running_left[run_count//3], (x, y))
-            run_count += 1
-        elif right:
-            window_display.blit(running_right[run_count//3], (x, y))
-            run_count += 1
-    else:
-        if left:
-            window_display.blit(running_left[0], (x, y))
-        else:
-            window_display.blit(running_right[0], (x, y))
-
+    man.move_santa(window_display)
     pygame.display.update()
 
 
 playing = True
+
+man = Santa(120, 10, window_width/2 - 150, 0.648 * window_height)
 
 while playing:
 
@@ -78,27 +68,27 @@ while playing:
 
     keys = pygame.key.get_pressed()
 
-    if keys[pygame.K_LEFT] and x > speed:
-        x -= speed
-        left = True
-        right = False
-        standing = False
+    if keys[pygame.K_LEFT] and man.x > man.speed:
+        man.x -= man.speed
+        man.left = True
+        man.right = False
+        man.standing = False
 
-    elif keys[pygame.K_RIGHT] and x < window_width - speed - santa_x:
-        x += speed
-        right = True
-        left = False
-        standing = False
+    elif keys[pygame.K_RIGHT] and man.x < window_width - man.speed - man.santa_x:
+        man.x += man.speed
+        man.right = True
+        man.left = False
+        man.standing = False
 
-    elif keys[pygame.K_DOWN] and y < window_height - speed - 125:
-        y += speed
-        standing = False
+    elif keys[pygame.K_DOWN] and man.y < window_height - man.speed - 125:
+        man.y += man.speed
+        man.standing = False
 
-    elif keys[pygame.K_UP] and y > santa_y + speed:
-        y -= speed
-        standing = False
+    elif keys[pygame.K_UP] and man.y > man.santa_y + man.speed:
+        man.y -= man.speed
+        man.standing = False
     else:
-        standing = True
+        man.standing = True
 
     refresh_window_display()
 
