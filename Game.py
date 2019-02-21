@@ -16,13 +16,26 @@ background = pygame.image.load('background/bulkhead-walls.png')
 deadSanta_x = window_width/2 - 150
 deadSanta_y = 0.648 * window_height
 
+class santa(object):
+    def __init__(self, santa_x, santa_y, x, y):
+        self.santa_x = santa_x
+        self.santa_y = santa_y
+        self.x = x
+        self.y = y
+        self.speed = speed
+        self.left = left
+        self.right = right
+        self.run_count = 0
+        self.standing = True
+
+
 santa_x = 120
 santa_y = 10
 
 x = window_width/2 - 150
 y = 0.648 * window_height
 
-speed = 4
+speed = 5
 left = False
 right = False
 run_count = 0
@@ -65,7 +78,7 @@ while playing:
 
     keys = pygame.key.get_pressed()
 
-    if keys[pygame.K_LEFT] and x > santa_x + speed:
+    if keys[pygame.K_LEFT] and x > speed:
         x -= speed
         left = True
         right = False
