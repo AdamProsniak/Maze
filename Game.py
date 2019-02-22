@@ -1,8 +1,9 @@
 import pygame
 import sys
+from os import path
 
 window_width = 1280
-window_height = 736
+window_height = 768
 
 wall_size = 64
 grid_width = window_width/wall_size
@@ -11,6 +12,7 @@ black_colour = (0, 0, 0)
 crimson_colour = (220, 20, 60)
 orange_colour = (225, 173, 0)
 white_colour = (255, 255, 255)
+green_colour = (124, 252, 0)
 
 window_display = pygame.display.set_mode((window_width, window_height))
 
@@ -19,9 +21,7 @@ running_left = [pygame.image.load(f'santa_running_left/Run{frame}.png') for fram
 
 
 class Santa(object):
-    def __init__(self, x, y):
-        self.deadSanta_x = window_width/2 - 150
-        self.deadSanta_y = 0.648 * window_height
+    def __init__(self, game, x, y):
         self.santa_width = 200
         self.santa_height = 137
         self.x = x
@@ -31,10 +31,13 @@ class Santa(object):
         self.right = False
         self.run_count = 0
         self.standing = True
-        self.hitbox = (self.x + 60, self.y, 80, 137)
+        self.x_col = 0
+        self.y_col = 0
+        self.game = game
+        self.hitbox = (self.x + 60, self.y + 5, 80, 120)
 
     def hit(self):
-        pass
+        print('hit')
 
     def move_santa(self, window_display):
 
@@ -54,35 +57,29 @@ class Santa(object):
             else:
                 window_display.blit(running_right[0], (self.x, self.y))
 
-            self.hitbox = (self.x + 60, self.y, 80, 137)
-            pygame.draw.rect(window_display, (255, 0, 0), self.hitbox, 2)
+        self.hitbox = (self.x + 60, self.y + 5, 80, 120)
+        pygame.draw.rect(window_display, green_colour, self.hitbox, 2)
+
+    def collisions(self):
+        for block in self.game.blocks:
+            if self.hitbox[1] > block.x < self.hitbox[1] + self.hitbox[3]:
+                if block.y > self.hitbox[2] - self.hitbox[4] and block.y < self.hitbox[2]:
+                    Santa.hit()
 
 
-class GridBackground(pygame.sprite.Sprite):
+class Block(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
         self.all_sprites = pygame.sprite.Group
-        self.groups = game.all_sprites, game.walls
+        self.groups = game.all_sprites, game.blocks
         pygame.sprite.Sprite.__init__(self, self.groups)
-        self.block = pygame.Surface((wall_size, wall_size))
-        self.block.fill(crimson_colour)
-        self.rect = self.block.get_rect()
+        self.image = pygame.Surface((wall_size, wall_size))
+        self.image.fill(crimson_colour)
+        self.rect = self.image.get_rect()
         self.x = x
         self.y = y
         self.rect.x = x * wall_size
         self.rect.y = y * wall_size
         self.window_display = window_display
-
-    def grid(self):
-        for x in range(0, window_width, wall_size):
-            pygame.draw.line(self.window_display, white_colour, (x, 0), (x, window_height))
-        for y in range(0, window_height, wall_size):
-            pygame.draw.line(self.window_display, white_colour, (0, y), (window_width, y))
-
-    def draw(self):
-        self.window_display.fill(black_colour)
-        self.grid()
-        self.all_sprites.draw(self.window_display)
-        pygame.display.flip()
 
 
 class Game:
@@ -93,12 +90,21 @@ class Game:
         self.window_display = pygame.display.set_mode((window_width, window_height))
         self.caption = pygame.display.set_caption("A way out")
         self.clock = pygame.time.Clock()
+        pygame.key.set_repeat()
+        self.maze()
+
+    def maze(self):
+        folder = path.dirname(__file__)
+        self.maze_rows = []
+        with open(path.join(folder, 'maze.txt'), 'r') as file:
+            for line in file:
+                self.maze_rows.append(line)
 
     def running_game(self):
 
         self.playing = True
 
-        man = Santa(window_width/2 - 150, 0.648 * window_height)
+        man = Santa(self, -30, 0)
 
         while self.playing:
 
@@ -107,6 +113,7 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.playing = False
+                    sys.exit()
 
             keys = pygame.key.get_pressed()
             man.move_santa(window_display)
@@ -135,10 +142,17 @@ class Game:
 
             self.all_sprites.update()
             self.draw()
+            man.move_santa(window_display)
             pygame.display.update()
 
     def start(self):
         self.all_sprites = pygame.sprite.Group()
+        self.blocks = pygame.sprite.Group()
+        for row, tiles in enumerate(self.maze_rows):
+            for column, tile in enumerate(tiles):
+                if tile == '1':
+                    Block(self, column, row)
+
 
     def grid(self):
         for x in range(0, window_width, wall_size):
@@ -151,8 +165,6 @@ class Game:
         self.grid()
         self.all_sprites.draw(self.window_display)
         pygame.display.flip()
-
-        pygame.quit()
 
 
 s = Game()
