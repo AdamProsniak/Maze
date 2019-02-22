@@ -1,4 +1,5 @@
 import pygame
+import sys
 
 window_width = 1280
 window_height = 736
@@ -12,8 +13,6 @@ orange_colour = (225, 173, 0)
 white_colour = (255, 255, 255)
 
 window_display = pygame.display.set_mode((window_width, window_height))
-pygame.display.set_caption("A way out")
-clock = pygame.time.Clock()
 
 running_right = [pygame.image.load(f'santa_running_right/Run{frame}.png') for frame in range(1, 11)]
 running_left = [pygame.image.load(f'santa_running_left/Run{frame}.png') for frame in range(1, 11)]
@@ -103,13 +102,14 @@ class Game:
 
         while self.playing:
 
-            clock.tick(30)
+            self.clock.tick(30)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.playing = False
 
             keys = pygame.key.get_pressed()
+            man.move_santa(window_display)
 
             if keys[pygame.K_LEFT] and man.x > man.speed - 70:
                 man.x -= man.speed
@@ -133,13 +133,29 @@ class Game:
             else:
                 man.standing = True
 
-            window_display.fill(black_colour)
-            man.move_santa(window_display)
+            self.all_sprites.update()
+            self.draw()
             pygame.display.update()
+
+    def start(self):
+        self.all_sprites = pygame.sprite.Group()
+
+    def grid(self):
+        for x in range(0, window_width, wall_size):
+            pygame.draw.line(self.window_display, white_colour, (x, 0), (x, window_height))
+        for y in range(0, window_height, wall_size):
+            pygame.draw.line(self.window_display, white_colour, (0, y), (window_width, y))
+
+    def draw(self):
+        self.window_display.fill(black_colour)
+        self.grid()
+        self.all_sprites.draw(self.window_display)
+        pygame.display.flip()
 
         pygame.quit()
 
 
 s = Game()
 while True:
+    s.start()
     s.running_game()
